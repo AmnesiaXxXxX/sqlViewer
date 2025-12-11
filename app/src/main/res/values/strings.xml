@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">SqlViewer</string>
+    <string-array name="engine_titles">
+        <item>SQLite</item>
+        <item>MySQL</item>
+        <item>PostgreSQL</item>
+        <item>SQL Server</item>
+        <item>Oracle</item>
+    </string-array>
 </resources>
