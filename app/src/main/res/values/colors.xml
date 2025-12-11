@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Базовая палитра в стиле Supabase -->
+    <color name="supabase_primary">#3ECF8E</color>
+    <color name="supabase_primary_dark">#1DB56B</color>
+    <color name="supabase_background">#0F172A</color>
+    <color name="supabase_surface">#111827</color>
+    <color name="supabase_surface_alt">#0B1221</color>
+    <color name="supabase_surface_high">#1F2937</color>
+    <color name="supabase_border">#1F3A56</color>
+    <color name="supabase_on_background">#E5E7EB</color>
+    <color name="supabase_on_surface">#D1D5DB</color>
+    <color name="supabase_on_primary">#0A0F1F</color>
+
     <color name="black" tools:ignore="UnusedResources">#FF000000</color>
     <color name="white" tools:ignore="UnusedResources">#FFFFFFFF</color>
 </resources>

@@ -1,8 +1,18 @@
 <resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.SqlViewer" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Настройка палитры под Supabase -->
+        <item name="colorPrimary">@color/supabase_primary</item>
+        <item name="colorPrimaryVariant">@color/supabase_primary_dark</item>
+        <item name="colorOnPrimary">@color/supabase_on_primary</item>
+        <item name="colorSecondary">@color/supabase_primary</item>
+        <item name="android:colorBackground">@color/supabase_background</item>
+        <item name="colorSurface">@color/supabase_surface</item>
+        <item name="colorOnSurface">@color/supabase_on_surface</item>
+        <item name="android:navigationBarColor">@color/supabase_background</item>
+        <item name="android:statusBarColor">@color/supabase_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 
     <style name="Theme.SqlViewer" parent="Base.Theme.SqlViewer" />
