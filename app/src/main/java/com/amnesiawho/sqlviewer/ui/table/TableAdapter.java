@@ -2,6 +2,7 @@ package com.amnesiawho.sqlviewer.ui.table;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amnesiawho.sqlviewer.R;
@@ -54,7 +56,9 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
 
     @Override
     public void onBindViewHolder(@NonNull RowViewHolder holder, int position) {
-        holder.bind(position == 0 ? columns : rows.get(position - 1), position == 0);
+        boolean isHeader = position == 0;
+        boolean isEvenRow = position % 2 == 0;
+        holder.bind(position == 0 ? columns : rows.get(position - 1), isHeader, isEvenRow);
     }
 
     @Override
@@ -70,20 +74,32 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
             rowContainer = itemView.findViewById(R.id.rowContainer);
         }
 
-        void bind(List<String> data, boolean isHeader) {
+        void bind(List<String> data, boolean isHeader, boolean isEvenRow) {
             rowContainer.removeAllViews();
             for (String cell : data) {
-                TextView textView = createCell(rowContainer.getContext(), cell, isHeader);
+                TextView textView = createCell(rowContainer.getContext(), cell, isHeader, isEvenRow);
                 rowContainer.addView(textView);
             }
         }
 
-        private TextView createCell(Context context, String text, boolean isHeader) {
+        private TextView createCell(Context context, String text, boolean isHeader, boolean isEvenRow) {
             TextView textView = new TextView(context);
             textView.setText(text);
             textView.setPadding(24, 16, 24, 16);
             textView.setTypeface(null, isHeader ? Typeface.BOLD : Typeface.NORMAL);
-            textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            textView.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+
+            // Подбираем фон и цвета текста под тёмную тему Supabase
+            int backgroundColor = ContextCompat.getColor(context, isHeader
+                    ? R.color.supabase_surface_high
+                    : isEvenRow ? R.color.supabase_surface : R.color.supabase_surface_alt);
+            int textColor = ContextCompat.getColor(context, R.color.supabase_on_surface);
+            textView.setBackgroundColor(backgroundColor);
+            textView.setTextColor(textColor);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 0, 12, 12);
+            textView.setLayoutParams(params);
             return textView;
         }
     }

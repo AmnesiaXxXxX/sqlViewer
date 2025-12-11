@@ -77,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         for (DbEngineType type : DbEngineType.values()) {
             titles.add(type.getTitle());
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, titles);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner_dark, titles);
+        adapter.setDropDownViewResource(R.layout.item_spinner_dark);
         engineSpinner.setAdapter(adapter);
         engineSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
