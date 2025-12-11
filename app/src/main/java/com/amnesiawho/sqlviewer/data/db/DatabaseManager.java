@@ -38,8 +38,16 @@ public class DatabaseManager {
         }
     }
 
-    public TableData readTable(String tableName, int limit) throws Exception {
-        return currentEngine.readTable(tableName, limit);
+    public TableData readTable(String schema, String tableName, int limit) throws Exception {
+        return currentEngine.readTable(schema, tableName, limit);
+    }
+
+    public java.util.List<SchemaInfo> listSchemas() throws Exception {
+        return currentEngine.listSchemas();
+    }
+
+    public java.util.List<String> listTables(String schema) throws Exception {
+        return currentEngine.listTables(schema);
     }
 
     public DbEngineType getCurrentType() {
