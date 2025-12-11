@@ -1,12 +1,9 @@
 package com.amnesiawho.sqlviewer;
 
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -21,11 +18,9 @@ import com.amnesiawho.sqlviewer.core.exception.GlobalExceptionHandler;
 import com.amnesiawho.sqlviewer.data.db.DatabaseManager;
 import com.amnesiawho.sqlviewer.data.db.DbEngineType;
 import com.amnesiawho.sqlviewer.data.db.TableData;
+import com.amnesiawho.sqlviewer.data.db.UrlEngineResolver;
 import com.amnesiawho.sqlviewer.ui.table.TableAdapter;
 import com.google.android.material.button.MaterialButtonToggleGroup;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private TableAdapter tableAdapter;
     private MaterialButtonToggleGroup limitToggleGroup;
     private EditText tableNameInput;
-    private Spinner engineSpinner;
+    private EditText urlInput;
+    private TextView engineLabel;
+    private Button connectButton;
+    private boolean isConnected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,16 +47,15 @@ public class MainActivity extends AppCompatActivity {
         // Инициализация инфраструктуры
         databaseManager = new DatabaseManager(this);
         setupViews();
-        setupEngineSpinner();
+        setupConnectionBlock();
         setupLimitSelector();
-
-        // Загружаем данные сразу, чтобы пользователь видел демо-таблицу
-        loadTable();
     }
 
     private void setupViews() {
         tableNameInput = findViewById(R.id.tableNameInput);
-        engineSpinner = findViewById(R.id.engineSpinner);
+        urlInput = findViewById(R.id.urlInput);
+        engineLabel = findViewById(R.id.engineLabel);
+        connectButton = findViewById(R.id.connectButton);
         limitToggleGroup = findViewById(R.id.limitToggleGroup);
         RecyclerView tableRecycler = findViewById(R.id.tableRecycler);
         Button loadButton = findViewById(R.id.loadButton);
@@ -71,28 +68,10 @@ public class MainActivity extends AppCompatActivity {
         loadButton.setOnClickListener(v -> loadTable());
     }
 
-    private void setupEngineSpinner() {
-        // Собираем список заголовков и связываем с перечислением
-        List<String> titles = new ArrayList<>();
-        for (DbEngineType type : DbEngineType.values()) {
-            titles.add(type.getTitle());
-        }
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.item_spinner_dark, titles);
-        adapter.setDropDownViewResource(R.layout.item_spinner_dark);
-        engineSpinner.setAdapter(adapter);
-        engineSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                DbEngineType selected = DbEngineType.values()[position];
-                databaseManager.switchEngine(selected);
-                loadTable();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Ничего не делаем
-            }
-        });
+    private void setupConnectionBlock() {
+        connectButton.setOnClickListener(v -> attemptConnection());
+        urlInput.setText("sqlite://demo");
+        updateEngineLabel(null);
     }
 
     private void setupLimitSelector() {
@@ -120,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadTable() {
+        if (!isConnected) {
+            Toast.makeText(this, "Сначала подключитесь к базе данных", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String tableName = tableNameInput.getText().toString();
         int limit = getSelectedLimit();
         try {
@@ -131,6 +114,33 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             // Пробрасываем ошибку в общий обработчик
             GlobalExceptionHandler.reportHandled(this, e);
+        }
+    }
+
+    private void attemptConnection() {
+        String url = urlInput.getText().toString().trim();
+        if (url.isEmpty()) {
+            Toast.makeText(this, "Введите URL подключения", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            DbEngineType engineType = UrlEngineResolver.resolve(url);
+            databaseManager.switchEngine(engineType);
+            isConnected = true;
+            updateEngineLabel(engineType);
+            Toast.makeText(this, "Подключение успешно: " + engineType.getTitle(), Toast.LENGTH_SHORT).show();
+        } catch (IllegalArgumentException ex) {
+            isConnected = false;
+            updateEngineLabel(null);
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void updateEngineLabel(DbEngineType engineType) {
+        if (engineType == null) {
+            engineLabel.setText("Движок будет определён автоматически");
+        } else {
+            engineLabel.setText("Определён движок: " + engineType.getTitle());
         }
     }
 }
