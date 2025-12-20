@@ -31,6 +31,7 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     private final List<List<String>> rows = new ArrayList<>();
     private List<String> columns = new ArrayList<>();
     private final OnRowSelectListener listener;
+    private final java.util.Set<Integer> selectedRows = new java.util.HashSet<>();
     private int selectedRowIndex = -1;
 
     public TableAdapter(Context context, OnRowSelectListener listener) {
@@ -46,8 +47,10 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
         notifyDataSetChanged();
     }
 
-    public void setSelectedRowIndex(int index) {
-        selectedRowIndex = index;
+    public void setSelection(java.util.Set<Integer> selection) {
+        selectedRows.clear();
+        selectedRows.addAll(selection);
+        selectedRowIndex = selection.isEmpty() ? -1 : selection.iterator().next();
         notifyDataSetChanged();
     }
 
@@ -67,7 +70,7 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     public void onBindViewHolder(@NonNull RowViewHolder holder, int position) {
         boolean isHeader = position == 0;
         boolean isEvenRow = position % 2 == 0;
-        boolean isSelected = !isHeader && (position - 1) == selectedRowIndex;
+        boolean isSelected = !isHeader && selectedRows.contains(position - 1);
         holder.bind(position == 0 ? columns : rows.get(position - 1),
                 isHeader,
                 isEvenRow,
@@ -83,10 +86,12 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
 
     static class RowViewHolder extends RecyclerView.ViewHolder {
         private final LinearLayout rowContainer;
+        private final android.widget.CheckBox checkBox;
 
         RowViewHolder(@NonNull View itemView) {
             super(itemView);
             rowContainer = itemView.findViewById(R.id.rowContainer);
+            checkBox = itemView.findViewById(R.id.rowCheckbox);
         }
 
         void bind(List<String> data, boolean isHeader, boolean isEvenRow, boolean isSelected, OnRowSelectListener listener, int rowIndex) {
@@ -95,15 +100,19 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
                 TextView textView = createCell(rowContainer.getContext(), cell, isHeader, isEvenRow, isSelected);
                 rowContainer.addView(textView);
             }
-            if (!isHeader && listener != null) {
-                itemView.setOnLongClickListener(v -> {
-                    listener.onRowSelect(rowIndex, data);
-                    return true;
-                });
-                itemView.setOnClickListener(null);
+            if (isHeader) {
+                checkBox.setVisibility(View.INVISIBLE);
+                checkBox.setOnCheckedChangeListener(null);
             } else {
-                itemView.setOnLongClickListener(null);
-                itemView.setOnClickListener(null);
+                checkBox.setVisibility(View.VISIBLE);
+                checkBox.setOnCheckedChangeListener(null);
+                checkBox.setChecked(isSelected);
+                checkBox.setOnCheckedChangeListener((buttonView, checked) -> {
+                    if (listener != null) {
+                        listener.onRowSelect(rowIndex, checked);
+                    }
+                });
+                itemView.setOnClickListener(v -> checkBox.toggle());
             }
         }
 
@@ -130,6 +139,6 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     }
 
     public interface OnRowSelectListener {
-        void onRowSelect(int rowIndex, List<String> rowData);
+        void onRowSelect(int rowIndex, boolean isSelected);
     }
 }

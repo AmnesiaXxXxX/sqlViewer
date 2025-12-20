@@ -45,7 +45,7 @@ public class TableDataActivity extends AppCompatActivity {
     private boolean schemaEditable;
     private TableData currentData;
     private int selectedRowIndex = -1;
-    private java.util.List<String> selectedRowData;
+    private final java.util.Set<Integer> selectedRows = new java.util.HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,11 +140,11 @@ public class TableDataActivity extends AppCompatActivity {
         int limit = resolveLimit();
         try {
             currentData = databaseManager.readTable(schemaName, tableName, limit);
-            tableAdapter.setData(currentData);
-            clearSelection();
-            if (currentData.isEmpty()) {
-                Toast.makeText(this, "Данных нет или таблица пуста", Toast.LENGTH_SHORT).show();
-            }
+        tableAdapter.setData(currentData);
+        clearSelection();
+        if (currentData.isEmpty()) {
+            Toast.makeText(this, "Данных нет или таблица пуста", Toast.LENGTH_SHORT).show();
+        }
         } catch (Exception e) {
             GlobalExceptionHandler.reportHandled(this, e);
             Toast.makeText(this, "Не удалось загрузить данные таблицы", Toast.LENGTH_SHORT).show();
@@ -159,21 +159,31 @@ public class TableDataActivity extends AppCompatActivity {
     }
 
     private void onRowSelected(int rowIndex, java.util.List<String> rowData) {
-        selectedRowIndex = rowIndex;
-        selectedRowData = new java.util.ArrayList<>(rowData);
-        selectedRowLabel.setText("Выбрана строка #" + (rowIndex + 1));
-        tableAdapter.setSelectedRowIndex(rowIndex);
-        editRowButton.setEnabled(schemaEditable);
-        deleteRowButton.setEnabled(schemaEditable);
+        if (isSelected) {
+            selectedRows.add(rowIndex);
+        } else {
+            selectedRows.remove(rowIndex);
+        }
+        updateSelectionState();
     }
 
     private void clearSelection() {
-        selectedRowIndex = -1;
-        selectedRowData = null;
-        selectedRowLabel.setText("Строка не выбрана");
-        tableAdapter.setSelectedRowIndex(-1);
-        editRowButton.setEnabled(false);
-        deleteRowButton.setEnabled(false);
+        selectedRows.clear();
+        updateSelectionState();
+    }
+
+    private void updateSelectionState() {
+        if (selectedRows.isEmpty()) {
+            selectedRowLabel.setText("Строки не выбраны");
+        } else if (selectedRows.size() == 1) {
+            int idx = selectedRows.iterator().next();
+            selectedRowLabel.setText("Выбрана строка #" + (idx + 1));
+        } else {
+            selectedRowLabel.setText("Выбрано строк: " + selectedRows.size());
+        }
+        tableAdapter.setSelection(selectedRows);
+        editRowButton.setEnabled(schemaEditable && selectedRows.size() == 1);
+        deleteRowButton.setEnabled(schemaEditable && !selectedRows.isEmpty());
     }
 
     private void showRowDialog(boolean isEdit) {
@@ -186,13 +196,15 @@ public class TableDataActivity extends AppCompatActivity {
             return;
         }
         int idIndex = findIdColumnIndex();
-        if (isEdit && (selectedRowIndex < 0 || selectedRowData == null)) {
-            Toast.makeText(this, "Выберите строку для изменения", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (isEdit && idIndex < 0) {
-            Toast.makeText(this, "Редактирование невозможно: отсутствует столбец id", Toast.LENGTH_LONG).show();
-            return;
+        if (isEdit) {
+            if (selectedRows.size() != 1) {
+                Toast.makeText(this, "Выберите одну строку для изменения", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (idIndex < 0) {
+                Toast.makeText(this, "Редактирование невозможно: отсутствует столбец id", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
 
         LinearLayout container = new LinearLayout(this);
@@ -201,6 +213,7 @@ public class TableDataActivity extends AppCompatActivity {
         container.setPadding(padding, padding / 2, padding, 0);
 
         java.util.List<TextInputEditText> inputs = new java.util.ArrayList<>();
+        java.util.List<String> sourceRow = isEdit ? resolveSingleSelectedRow() : null;
         for (int i = 0; i < currentData.getColumns().size(); i++) {
             String column = currentData.getColumns().get(i);
             if ("id".equalsIgnoreCase(column)) {
@@ -210,8 +223,8 @@ public class TableDataActivity extends AppCompatActivity {
             layout.setHint(column);
             TextInputEditText editText = new TextInputEditText(layout.getContext());
             layout.addView(editText);
-            if (isEdit && selectedRowData != null && i < selectedRowData.size()) {
-                editText.setText(selectedRowData.get(i));
+            if (isEdit && sourceRow != null && i < sourceRow.size()) {
+                editText.setText(sourceRow.get(i));
             }
             inputs.add(editText);
             container.addView(layout);
@@ -253,11 +266,12 @@ public class TableDataActivity extends AppCompatActivity {
     }
 
     private void updateRow(int idIndex, ContentValues values) {
-        if (selectedRowData == null || idIndex >= selectedRowData.size()) {
+        java.util.List<String> row = resolveSingleSelectedRow();
+        if (row == null || idIndex >= row.size()) {
             Toast.makeText(this, "Невозможно обновить строку", Toast.LENGTH_SHORT).show();
             return;
         }
-        String idValue = selectedRowData.get(idIndex);
+        String idValue = row.get(idIndex);
         try {
             databaseManager.update(schemaName, tableName, values, "id = ?", new String[]{idValue});
             Toast.makeText(this, "Строка обновлена", Toast.LENGTH_SHORT).show();
@@ -270,32 +284,47 @@ public class TableDataActivity extends AppCompatActivity {
 
     private void confirmDelete() {
         int idIndex = findIdColumnIndex();
-        if (selectedRowData == null || selectedRowIndex < 0) {
-            Toast.makeText(this, "Выберите строку для удаления", Toast.LENGTH_SHORT).show();
+        if (selectedRows.isEmpty()) {
+            Toast.makeText(this, "Выберите строки для удаления", Toast.LENGTH_SHORT).show();
             return;
         }
         if (idIndex < 0) {
             Toast.makeText(this, "Удаление невозможно: отсутствует столбец id", Toast.LENGTH_LONG).show();
             return;
         }
-        String idValue = selectedRowData.get(idIndex);
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Удалить строку?")
+                .setTitle("Удалить выбранные строки?")
                 .setMessage("Это действие необратимо.")
                 .setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
-                .setPositiveButton("Удалить", (dialog, which) -> deleteRow(idValue))
+                .setPositiveButton("Удалить", (dialog, which) -> deleteSelectedRows(idIndex))
                 .show();
     }
 
-    private void deleteRow(String idValue) {
+    private void deleteSelectedRows(int idIndex) {
         try {
-            databaseManager.delete(schemaName, tableName, "id = ?", new String[]{idValue});
-            Toast.makeText(this, "Строка удалена", Toast.LENGTH_SHORT).show();
+            for (Integer rowIndex : selectedRows) {
+                java.util.List<String> row = currentData.getRows().get(rowIndex);
+                if (idIndex >= row.size()) continue;
+                String idValue = row.get(idIndex);
+                databaseManager.delete(schemaName, tableName, "id = ?", new String[]{idValue});
+            }
+            Toast.makeText(this, "Строки удалены", Toast.LENGTH_SHORT).show();
             loadTable();
         } catch (Exception e) {
             GlobalExceptionHandler.reportHandled(this, e);
-            Toast.makeText(this, "Не удалось удалить строку", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Не удалось удалить строки", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private java.util.List<String> resolveSingleSelectedRow() {
+        if (selectedRows.size() != 1 || currentData == null) {
+            return null;
+        }
+        int idx = selectedRows.iterator().next();
+        if (idx < 0 || idx >= currentData.getRows().size()) {
+            return null;
+        }
+        return currentData.getRows().get(idx);
     }
 
     private int findIdColumnIndex() {
