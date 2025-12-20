@@ -157,6 +157,18 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
     }
 
     @Override
+    public void createTable(String schema, String tableName) {
+        validateTableName(tableName);
+        String qualifiedName = buildQualifiedName(schema, tableName);
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + qualifiedName + " (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name TEXT NOT NULL, " +
+                "created_at TEXT DEFAULT CURRENT_TIMESTAMP" +
+                ");");
+    }
+
+    @Override
     public long insert(String tableName, ContentValues values) {
         return getWritableDatabase().insert(tableName, null, values);
     }
@@ -174,5 +186,24 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
     @Override
     public void close() {
         super.close();
+    }
+
+    private void validateTableName(String tableName) {
+        if (tableName == null || tableName.isEmpty()) {
+            throw new IllegalArgumentException("Название таблицы не может быть пустым");
+        }
+        if (!tableName.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+            throw new IllegalArgumentException("Используйте латинские буквы, цифры и подчёркивания, начиная с буквы");
+        }
+    }
+
+    private String buildQualifiedName(String schema, String tableName) {
+        if (schema == null || schema.isEmpty() || "main".equalsIgnoreCase(schema)) {
+            return tableName;
+        }
+        if ("temp".equalsIgnoreCase(schema)) {
+            return "temp." + tableName;
+        }
+        return schema + "." + tableName;
     }
 }

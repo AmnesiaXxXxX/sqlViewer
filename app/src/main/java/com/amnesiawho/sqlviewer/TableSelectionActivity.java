@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import com.amnesiawho.sqlviewer.core.exception.GlobalExceptionHandler;
 import com.amnesiawho.sqlviewer.data.db.DatabaseManager;
 import com.amnesiawho.sqlviewer.data.db.DbEngineType;
 import com.amnesiawho.sqlviewer.ui.table.TableListAdapter;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.List;
 
@@ -121,7 +123,7 @@ public class TableSelectionActivity extends AppCompatActivity {
             Toast.makeText(this, "Редактирование недоступно для выбранной схемы", Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(this, "Функционал добавления таблиц будет доступен позже", Toast.LENGTH_SHORT).show();
+        showCreateTableDialog();
     }
 
     private void openTableScreen() {
@@ -135,5 +137,48 @@ public class TableSelectionActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_ENGINE_TYPE, engineType.name());
         intent.putExtra(EXTRA_SELECTED_TABLE, selectedTable);
         startActivity(intent);
+    }
+
+    private void showCreateTableDialog() {
+        final EditText input = new EditText(this);
+        input.setHint("Название таблицы (латиница и _)");
+        input.setSingleLine(true);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Новая таблица")
+                .setMessage("Будет создана таблица с полями id, name, created_at")
+                .setView(input)
+                .setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
+                .setPositiveButton("Создать", (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    createTable(name);
+                })
+                .show();
+    }
+
+    private void createTable(String tableName) {
+        if (tableName.isEmpty()) {
+            Toast.makeText(this, "Укажите название таблицы", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!tableName.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+            Toast.makeText(this, "Используйте латиницу, цифры и _ , начиная с буквы", Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            databaseManager.createTable(schemaName, tableName);
+            Toast.makeText(this, "Таблица создана: " + tableName, Toast.LENGTH_SHORT).show();
+            reloadTablesAndSelect(tableName);
+        } catch (Exception e) {
+            GlobalExceptionHandler.reportHandled(this, e);
+            Toast.makeText(this, "Не удалось создать таблицу", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void reloadTablesAndSelect(String tableName) throws Exception {
+        List<String> tables = databaseManager.listTables(schemaName);
+        tableListAdapter.setItems(tables);
+        tableListAdapter.setSelectedTable(tableName);
+        onTableSelected(tableName);
     }
 }

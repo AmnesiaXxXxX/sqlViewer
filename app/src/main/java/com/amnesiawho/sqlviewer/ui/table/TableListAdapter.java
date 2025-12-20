@@ -35,6 +35,11 @@ public class TableListAdapter extends RecyclerView.Adapter<TableListAdapter.Tabl
         notifyDataSetChanged();
     }
 
+    public void setSelectedTable(String tableName) {
+        selectedTable = tableName;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public TableViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

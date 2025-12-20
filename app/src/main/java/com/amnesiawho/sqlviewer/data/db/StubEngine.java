@@ -4,7 +4,9 @@ import android.content.ContentValues;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Заглушка для движков, требующих отдельного драйвера. Дает единое сообщение, чтобы UI не падал.
@@ -13,9 +15,13 @@ public class StubEngine implements DatabaseEngine {
 
     private final DbEngineType type;
     private boolean connected = false;
+    private final Map<String, List<String>> schemaTables = new HashMap<>();
 
     public StubEngine(DbEngineType type) {
         this.type = type;
+        schemaTables.put("sandbox", new ArrayList<>(Collections.singletonList("draft_table")));
+        schemaTables.put("public", new ArrayList<>(java.util.Arrays.asList("users", "events", "metrics")));
+        schemaTables.put("analytics", new ArrayList<>(Collections.singletonList("reports")));
     }
 
     @Override
@@ -44,14 +50,24 @@ public class StubEngine implements DatabaseEngine {
 
     @Override
     public List<String> listTables(String schema) {
-        if ("sandbox".equalsIgnoreCase(schema)) {
-            return Collections.singletonList("draft_table");
+        String key = schema == null ? "" : schema.toLowerCase();
+        List<String> tables = schemaTables.get(key);
+        if (tables != null) {
+            return new ArrayList<>(tables);
         }
-        List<String> tables = new ArrayList<>();
-        tables.add("users");
-        tables.add("events");
-        tables.add("metrics");
-        return tables;
+        return new ArrayList<>(Collections.singletonList("example_table"));
+    }
+
+    @Override
+    public void createTable(String schema, String tableName) {
+        if (tableName == null || tableName.isEmpty()) {
+            throw new IllegalArgumentException("Название таблицы не может быть пустым");
+        }
+        String key = schema == null ? "" : schema.toLowerCase();
+        List<String> tables = schemaTables.computeIfAbsent(key, s -> new ArrayList<>());
+        if (!tables.contains(tableName)) {
+            tables.add(tableName);
+        }
     }
 
     @Override

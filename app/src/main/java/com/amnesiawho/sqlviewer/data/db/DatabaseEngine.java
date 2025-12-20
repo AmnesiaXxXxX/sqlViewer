@@ -32,6 +32,14 @@ public interface DatabaseEngine {
      */
     List<String> listTables(String schema) throws Exception;
 
+    /**
+     * Создает новую таблицу с базовыми колонками.
+     *
+     * @param schema    имя схемы/пространства, может быть null/пустым для движков без схем
+     * @param tableName имя таблицы
+     */
+    void createTable(String schema, String tableName) throws Exception;
+
     long insert(String tableName, ContentValues values) throws Exception;
 
     int update(String tableName, ContentValues values, String whereClause, String[] whereArgs) throws Exception;

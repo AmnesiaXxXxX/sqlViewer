@@ -50,6 +50,10 @@ public class DatabaseManager {
         return currentEngine.listTables(schema);
     }
 
+    public void createTable(String schema, String tableName) throws Exception {
+        currentEngine.createTable(schema, tableName);
+    }
+
     public DbEngineType getCurrentType() {
         return currentType;
     }
