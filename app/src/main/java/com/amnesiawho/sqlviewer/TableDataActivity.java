@@ -140,11 +140,11 @@ public class TableDataActivity extends AppCompatActivity {
         int limit = resolveLimit();
         try {
             currentData = databaseManager.readTable(schemaName, tableName, limit);
-        tableAdapter.setData(currentData);
-        clearSelection();
-        if (currentData.isEmpty()) {
-            Toast.makeText(this, "Данных нет или таблица пуста", Toast.LENGTH_SHORT).show();
-        }
+            tableAdapter.setData(currentData);
+            clearSelection();
+            if (currentData.isEmpty()) {
+                Toast.makeText(this, "Данных нет или таблица пуста", Toast.LENGTH_SHORT).show();
+            }
         } catch (Exception e) {
             GlobalExceptionHandler.reportHandled(this, e);
             Toast.makeText(this, "Не удалось загрузить данные таблицы", Toast.LENGTH_SHORT).show();
@@ -158,7 +158,7 @@ public class TableDataActivity extends AppCompatActivity {
         deleteRowButton.setEnabled(false);
     }
 
-    private void onRowSelected(int rowIndex, java.util.List<String> rowData) {
+    private void onRowSelected(int rowIndex, boolean isSelected) {
         if (isSelected) {
             selectedRows.add(rowIndex);
         } else {
