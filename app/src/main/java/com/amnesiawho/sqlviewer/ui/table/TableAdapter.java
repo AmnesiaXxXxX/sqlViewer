@@ -30,10 +30,10 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     private final LayoutInflater inflater;
     private final List<List<String>> rows = new ArrayList<>();
     private List<String> columns = new ArrayList<>();
-    private final OnRowClickListener listener;
+    private final OnRowSelectListener listener;
     private int selectedRowIndex = -1;
 
-    public TableAdapter(Context context, OnRowClickListener listener) {
+    public TableAdapter(Context context, OnRowSelectListener listener) {
         this.inflater = LayoutInflater.from(context);
         this.listener = listener;
     }
@@ -89,15 +89,20 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
             rowContainer = itemView.findViewById(R.id.rowContainer);
         }
 
-        void bind(List<String> data, boolean isHeader, boolean isEvenRow, boolean isSelected, OnRowClickListener listener, int rowIndex) {
+        void bind(List<String> data, boolean isHeader, boolean isEvenRow, boolean isSelected, OnRowSelectListener listener, int rowIndex) {
             rowContainer.removeAllViews();
             for (String cell : data) {
                 TextView textView = createCell(rowContainer.getContext(), cell, isHeader, isEvenRow, isSelected);
                 rowContainer.addView(textView);
             }
             if (!isHeader && listener != null) {
-                itemView.setOnClickListener(v -> listener.onRowClick(rowIndex, data));
+                itemView.setOnLongClickListener(v -> {
+                    listener.onRowSelect(rowIndex, data);
+                    return true;
+                });
+                itemView.setOnClickListener(null);
             } else {
+                itemView.setOnLongClickListener(null);
                 itemView.setOnClickListener(null);
             }
         }
@@ -124,7 +129,7 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
         }
     }
 
-    public interface OnRowClickListener {
-        void onRowClick(int rowIndex, List<String> rowData);
+    public interface OnRowSelectListener {
+        void onRowSelect(int rowIndex, List<String> rowData);
     }
 }
