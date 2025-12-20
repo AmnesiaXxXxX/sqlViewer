@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tableDataRoot"
@@ -7,244 +7,243 @@
     android:layout_height="match_parent"
     android:background="@color/supabase_background"
     android:padding="16dp"
+    android:fillViewport="true"
     tools:context=".TableDataActivity">
 
-    <TextView
-        android:id="@+id/tableDataTitle"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Данные таблицы"
-        android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-        android:textColor="@color/supabase_on_background"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/tableDataHeaderCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:padding="16dp"
-        app:cardBackgroundColor="@color/supabase_surface"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="2dp"
-        app:strokeColor="@color/supabase_border"
-        app:strokeWidth="1dp"
-        app:layout_constraintTop_toBottomOf="@id/tableDataTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/tableDataTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:text="Данные таблицы"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+            android:textColor="@color/supabase_on_background" />
 
-            <TextView
-                android:id="@+id/tableNameTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/supabase_on_surface"
-                android:textStyle="bold"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/dataSchemaLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/supabase_on_surface"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/dataSchemaAccessLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/supabase_primary"
-                android:textSize="13sp" />
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/dataLimitToggleGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:checkedButton="@id/dataLimit100"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dataLimit100"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="100"
-                    android:textColor="@color/supabase_on_surface"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:rippleColor="@color/supabase_primary" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dataLimit1000"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="1000"
-                    android:textColor="@color/supabase_on_surface"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:rippleColor="@color/supabase_primary" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dataLimit1500"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="1500"
-                    android:textColor="@color/supabase_on_surface"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:rippleColor="@color/supabase_primary" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/dataLimitUnlimited"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Без лимита"
-                    android:textColor="@color/supabase_on_surface"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:rippleColor="@color/supabase_primary" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-
-            <TextView
-                android:id="@+id/selectedRowLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Строка не выбрана"
-                android:textColor="@color/supabase_on_surface"
-                android:textSize="13sp" />
-
-            <LinearLayout
-                android:id="@+id/crudButtonsRow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                android:weightSum="3">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/addRowButton"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Добавить"
-                    android:textAllCaps="false"
-                    android:textColor="@color/supabase_on_primary"
-                    app:backgroundTint="@color/supabase_primary"
-                    app:cornerRadius="12dp"
-                    app:iconTint="@color/supabase_on_primary" />
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="wrap_content" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/editRowButton"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Изменить"
-                    android:textAllCaps="false"
-                    android:textColor="@color/supabase_on_surface"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:cornerRadius="12dp"
-                    app:iconTint="@color/supabase_on_surface" />
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="wrap_content" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/deleteRowButton"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Удалить"
-                    android:textAllCaps="false"
-                    android:textColor="@color/supabase_warning"
-                    app:backgroundTint="@color/supabase_surface_high"
-                    app:cornerRadius="12dp"
-                    app:iconTint="@color/supabase_warning" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal"
-                android:weightSum="3">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/reloadTableButton"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.5"
-                    android:text="Обновить"
-                    android:textAllCaps="false"
-                    android:textColor="@color/supabase_on_primary"
-                    app:backgroundTint="@color/supabase_primary"
-                    app:cornerRadius="12dp"
-                    app:iconTint="@color/supabase_on_primary" />
-
-                <Space
-                    android:layout_width="12dp"
-                    android:layout_height="wrap_content" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/rlsButton"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.5"
-                    android:text="RLS политики"
-                    android:textAllCaps="false"
-                    android:textColor="@color/supabase_on_primary"
-                    app:backgroundTint="@color/supabase_primary_dark"
-                    app:cornerRadius="12dp"
-                    app:iconTint="@color/supabase_on_primary" />
-            </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/tableDataCard"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        app:cardBackgroundColor="@color/supabase_surface_high"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:strokeColor="@color/supabase_border"
-        app:strokeWidth="1dp"
-        app:layout_constraintTop_toBottomOf="@id/tableDataHeaderCard"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/dataRecycler"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tableDataHeaderCard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="12dp"
-            tools:listitem="@layout/item_table_row" />
-    </com.google.android.material.card.MaterialCardView>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="16dp"
+            app:cardBackgroundColor="@color/supabase_surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/supabase_border"
+            app:strokeWidth="1dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tableNameTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/supabase_on_surface"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/dataSchemaLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/supabase_on_surface"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/dataSchemaAccessLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/supabase_primary"
+                    android:textSize="13sp" />
+
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/dataLimitToggleGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:checkedButton="@id/dataLimit100"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dataLimit100"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="100"
+                        android:textColor="@color/supabase_on_surface"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:rippleColor="@color/supabase_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dataLimit1000"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="1000"
+                        android:textColor="@color/supabase_on_surface"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:rippleColor="@color/supabase_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dataLimit1500"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="1500"
+                        android:textColor="@color/supabase_on_surface"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:rippleColor="@color/supabase_primary" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/dataLimitUnlimited"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Без лимита"
+                        android:textColor="@color/supabase_on_surface"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:rippleColor="@color/supabase_primary" />
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <TextView
+                    android:id="@+id/selectedRowLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Строки не выбраны"
+                    android:textColor="@color/supabase_on_surface"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:id="@+id/crudButtonsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:weightSum="3">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addRowButton"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Добавить"
+                        android:textAllCaps="false"
+                        android:textColor="@color/supabase_on_primary"
+                        app:backgroundTint="@color/supabase_primary"
+                        app:cornerRadius="12dp"
+                        app:iconTint="@color/supabase_on_primary" />
+
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/editRowButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Изменить"
+                        android:textAllCaps="false"
+                        android:textColor="@color/supabase_on_surface"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:cornerRadius="12dp"
+                        app:iconTint="@color/supabase_on_surface" />
+
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/deleteRowButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Удалить"
+                        android:textAllCaps="false"
+                        android:textColor="@color/supabase_warning"
+                        app:backgroundTint="@color/supabase_surface_high"
+                        app:cornerRadius="12dp"
+                        app:iconTint="@color/supabase_warning" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/reloadTableButton"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:text="Обновить"
+                        android:textAllCaps="false"
+                        android:textColor="@color/supabase_on_primary"
+                        app:backgroundTint="@color/supabase_primary"
+                        app:cornerRadius="12dp"
+                        app:iconTint="@color/supabase_on_primary" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/rlsButton"
+                        style="@style/Widget.Material3.Button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:text="RLS политики"
+                        android:textAllCaps="false"
+                        android:textColor="@color/supabase_on_primary"
+                        app:backgroundTint="@color/supabase_primary_dark"
+                        app:cornerRadius="12dp"
+                        app:iconTint="@color/supabase_on_primary" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/tableDataCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/supabase_surface_high"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/supabase_border"
+            app:strokeWidth="1dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dataRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:padding="12dp"
+                tools:listitem="@layout/item_table_row" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
