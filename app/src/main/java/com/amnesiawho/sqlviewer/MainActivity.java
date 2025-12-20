@@ -1,5 +1,6 @@
 package com.amnesiawho.sqlviewer;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -12,10 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.amnesiawho.sqlviewer.core.exception.GlobalExceptionHandler;
 import com.amnesiawho.sqlviewer.data.db.DatabaseManager;
 import com.amnesiawho.sqlviewer.data.db.DbEngineType;
 import com.amnesiawho.sqlviewer.data.db.SchemaInfo;
@@ -109,28 +107,30 @@ public class MainActivity extends AppCompatActivity {
         tableSelectorCard.setVisibility(View.GONE);
     }
 
-    private void setupLimitSelector() {
-        // Устанавливаем обработчик смены лимита
-        limitToggleGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            if (isChecked) {
-                loadTable();
-            }
-        });
+    private void attemptConnection() {
+        String url = urlInput.getText().toString().trim();
+        if (url.isEmpty()) {
+            Toast.makeText(this, "Введите URL подключения", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            DbEngineType engineType = UrlEngineResolver.resolve(url);
+            databaseManager.switchEngine(engineType);
+            updateEngineLabel(engineType);
+            Toast.makeText(this, "Подключение успешно: " + engineType.getTitle(), Toast.LENGTH_SHORT).show();
+            openSchemaSelection(engineType);
+        } catch (IllegalArgumentException ex) {
+            updateEngineLabel(null);
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
-    private int getSelectedLimit() {
-        int checkedId = limitToggleGroup.getCheckedButtonId();
-        if (checkedId == R.id.limit100) {
-            return 100;
-        } else if (checkedId == R.id.limit1000) {
-            return 1000;
-        } else if (checkedId == R.id.limit1500) {
-            return 1500;
-        } else if (checkedId == R.id.limitNoLimit) {
-            return -1;
+    private void updateEngineLabel(DbEngineType engineType) {
+        if (engineType == null) {
+            engineLabel.setText("Движок будет определён автоматически");
+        } else {
+            engineLabel.setText("Определён движок: " + engineType.getTitle());
         }
-        // Значение по умолчанию
-        return 100;
     }
 
     private void loadTable() {
