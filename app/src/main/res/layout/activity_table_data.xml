@@ -118,6 +118,72 @@
                     app:rippleColor="@color/supabase_primary" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
+            <TextView
+                android:id="@+id/selectedRowLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Строка не выбрана"
+                android:textColor="@color/supabase_on_surface"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/crudButtonsRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:weightSum="3">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/addRowButton"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Добавить"
+                    android:textAllCaps="false"
+                    android:textColor="@color/supabase_on_primary"
+                    app:backgroundTint="@color/supabase_primary"
+                    app:cornerRadius="12dp"
+                    app:iconTint="@color/supabase_on_primary" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="wrap_content" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/editRowButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Изменить"
+                    android:textAllCaps="false"
+                    android:textColor="@color/supabase_on_surface"
+                    app:backgroundTint="@color/supabase_surface_high"
+                    app:cornerRadius="12dp"
+                    app:iconTint="@color/supabase_on_surface" />
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="wrap_content" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deleteRowButton"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Удалить"
+                    android:textAllCaps="false"
+                    android:textColor="@color/supabase_warning"
+                    app:backgroundTint="@color/supabase_surface_high"
+                    app:cornerRadius="12dp"
+                    app:iconTint="@color/supabase_warning" />
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

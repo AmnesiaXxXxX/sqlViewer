@@ -180,18 +180,21 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
     }
 
     @Override
-    public long insert(String tableName, ContentValues values) {
-        return getWritableDatabase().insert(tableName, null, values);
+    public long insert(String schema, String tableName, ContentValues values) {
+        String qualifiedName = buildQualifiedName(schema, tableName);
+        return getWritableDatabase().insert(qualifiedName, null, values);
     }
 
     @Override
-    public int update(String tableName, ContentValues values, String whereClause, String[] whereArgs) {
-        return getWritableDatabase().update(tableName, values, whereClause, whereArgs);
+    public int update(String schema, String tableName, ContentValues values, String whereClause, String[] whereArgs) {
+        String qualifiedName = buildQualifiedName(schema, tableName);
+        return getWritableDatabase().update(qualifiedName, values, whereClause, whereArgs);
     }
 
     @Override
-    public int delete(String tableName, String whereClause, String[] whereArgs) {
-        return getWritableDatabase().delete(tableName, whereClause, whereArgs);
+    public int delete(String schema, String tableName, String whereClause, String[] whereArgs) {
+        String qualifiedName = buildQualifiedName(schema, tableName);
+        return getWritableDatabase().delete(qualifiedName, whereClause, whereArgs);
     }
 
     @Override

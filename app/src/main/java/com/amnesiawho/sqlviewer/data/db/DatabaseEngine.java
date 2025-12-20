@@ -40,11 +40,11 @@ public interface DatabaseEngine {
      */
     void createTable(String schema, String tableName) throws Exception;
 
-    long insert(String tableName, ContentValues values) throws Exception;
+    long insert(String schema, String tableName, ContentValues values) throws Exception;
 
-    int update(String tableName, ContentValues values, String whereClause, String[] whereArgs) throws Exception;
+    int update(String schema, String tableName, ContentValues values, String whereClause, String[] whereArgs) throws Exception;
 
-    int delete(String tableName, String whereClause, String[] whereArgs) throws Exception;
+    int delete(String schema, String tableName, String whereClause, String[] whereArgs) throws Exception;
 
     void close();
 }

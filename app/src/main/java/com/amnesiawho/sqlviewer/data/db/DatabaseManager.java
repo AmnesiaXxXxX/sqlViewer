@@ -55,6 +55,18 @@ public class DatabaseManager {
         currentEngine.createTable(schema, tableName);
     }
 
+    public long insert(String schema, String tableName, android.content.ContentValues values) throws Exception {
+        return currentEngine.insert(schema, tableName, values);
+    }
+
+    public int update(String schema, String tableName, android.content.ContentValues values, String whereClause, String[] whereArgs) throws Exception {
+        return currentEngine.update(schema, tableName, values, whereClause, whereArgs);
+    }
+
+    public int delete(String schema, String tableName, String whereClause, String[] whereArgs) throws Exception {
+        return currentEngine.delete(schema, tableName, whereClause, whereArgs);
+    }
+
     public DbEngineType getCurrentType() {
         return currentType;
     }

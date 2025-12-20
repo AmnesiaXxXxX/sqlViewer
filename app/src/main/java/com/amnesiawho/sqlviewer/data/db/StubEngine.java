@@ -71,17 +71,17 @@ public class StubEngine implements DatabaseEngine {
     }
 
     @Override
-    public long insert(String tableName, ContentValues values) {
+    public long insert(String schema, String tableName, ContentValues values) {
         throw new UnsupportedOperationException("CRUD недоступен для движка " + type.getTitle());
     }
 
     @Override
-    public int update(String tableName, ContentValues values, String whereClause, String[] whereArgs) {
+    public int update(String schema, String tableName, ContentValues values, String whereClause, String[] whereArgs) {
         throw new UnsupportedOperationException("CRUD недоступен для движка " + type.getTitle());
     }
 
     @Override
-    public int delete(String tableName, String whereClause, String[] whereArgs) {
+    public int delete(String schema, String tableName, String whereClause, String[] whereArgs) {
         throw new UnsupportedOperationException("CRUD недоступен для движка " + type.getTitle());
     }
 

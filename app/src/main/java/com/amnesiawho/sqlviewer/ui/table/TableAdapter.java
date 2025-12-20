@@ -30,15 +30,24 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     private final LayoutInflater inflater;
     private final List<List<String>> rows = new ArrayList<>();
     private List<String> columns = new ArrayList<>();
+    private final OnRowClickListener listener;
+    private int selectedRowIndex = -1;
 
-    public TableAdapter(Context context) {
+    public TableAdapter(Context context, OnRowClickListener listener) {
         this.inflater = LayoutInflater.from(context);
+        this.listener = listener;
     }
 
     public void setData(TableData data) {
         columns = new ArrayList<>(data.getColumns());
         rows.clear();
         rows.addAll(data.getRows());
+        selectedRowIndex = -1;
+        notifyDataSetChanged();
+    }
+
+    public void setSelectedRowIndex(int index) {
+        selectedRowIndex = index;
         notifyDataSetChanged();
     }
 
@@ -58,7 +67,13 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
     public void onBindViewHolder(@NonNull RowViewHolder holder, int position) {
         boolean isHeader = position == 0;
         boolean isEvenRow = position % 2 == 0;
-        holder.bind(position == 0 ? columns : rows.get(position - 1), isHeader, isEvenRow);
+        boolean isSelected = !isHeader && (position - 1) == selectedRowIndex;
+        holder.bind(position == 0 ? columns : rows.get(position - 1),
+                isHeader,
+                isEvenRow,
+                isSelected,
+                listener,
+                isHeader ? -1 : position - 1);
     }
 
     @Override
@@ -74,15 +89,20 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
             rowContainer = itemView.findViewById(R.id.rowContainer);
         }
 
-        void bind(List<String> data, boolean isHeader, boolean isEvenRow) {
+        void bind(List<String> data, boolean isHeader, boolean isEvenRow, boolean isSelected, OnRowClickListener listener, int rowIndex) {
             rowContainer.removeAllViews();
             for (String cell : data) {
-                TextView textView = createCell(rowContainer.getContext(), cell, isHeader, isEvenRow);
+                TextView textView = createCell(rowContainer.getContext(), cell, isHeader, isEvenRow, isSelected);
                 rowContainer.addView(textView);
+            }
+            if (!isHeader && listener != null) {
+                itemView.setOnClickListener(v -> listener.onRowClick(rowIndex, data));
+            } else {
+                itemView.setOnClickListener(null);
             }
         }
 
-        private TextView createCell(Context context, String text, boolean isHeader, boolean isEvenRow) {
+        private TextView createCell(Context context, String text, boolean isHeader, boolean isEvenRow, boolean isSelected) {
             TextView textView = new TextView(context);
             textView.setText(text);
             textView.setPadding(24, 16, 24, 16);
@@ -92,7 +112,7 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
             // Подбираем фон и цвета текста под тёмную тему Supabase
             int backgroundColor = ContextCompat.getColor(context, isHeader
                     ? R.color.supabase_surface_high
-                    : isEvenRow ? R.color.supabase_surface : R.color.supabase_surface_alt);
+                    : isSelected ? R.color.supabase_primary_tint : isEvenRow ? R.color.supabase_surface : R.color.supabase_surface_alt);
             int textColor = ContextCompat.getColor(context, R.color.supabase_on_surface);
             textView.setBackgroundColor(backgroundColor);
             textView.setTextColor(textColor);
@@ -102,5 +122,9 @@ public class TableAdapter extends RecyclerView.Adapter<TableAdapter.RowViewHolde
             textView.setLayoutParams(params);
             return textView;
         }
+    }
+
+    public interface OnRowClickListener {
+        void onRowClick(int rowIndex, List<String> rowData);
     }
 }
