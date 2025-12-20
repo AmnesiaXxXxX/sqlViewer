@@ -25,12 +25,33 @@ public class StubEngine implements DatabaseEngine {
     }
 
     @Override
-    public TableData readTable(String tableName, int limit) {
+    public TableData readTable(String schema, String tableName, int limit) {
         // Возвращаем информативную таблицу, чтобы пользователь понимал, что нужно подключить драйвер.
         List<String> columns = Collections.singletonList("Движок " + type.getTitle());
         List<List<String>> rows = new ArrayList<>();
         rows.add(Collections.singletonList("Добавьте драйвер и реальное подключение, чтобы читать таблицу '" + tableName + "'."));
         return new TableData(columns, rows);
+    }
+
+    @Override
+    public List<SchemaInfo> listSchemas() {
+        List<SchemaInfo> schemas = new ArrayList<>();
+        schemas.add(new SchemaInfo("public", false));
+        schemas.add(new SchemaInfo("sandbox", true));
+        schemas.add(new SchemaInfo("analytics", false));
+        return schemas;
+    }
+
+    @Override
+    public List<String> listTables(String schema) {
+        if ("sandbox".equalsIgnoreCase(schema)) {
+            return Collections.singletonList("draft_table");
+        }
+        List<String> tables = new ArrayList<>();
+        tables.add("users");
+        tables.add("events");
+        tables.add("metrics");
+        return tables;
     }
 
     @Override
