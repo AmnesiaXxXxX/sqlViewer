@@ -2,6 +2,8 @@ package com.amnesiawho.sqlviewer.data.db;
 
 import android.content.ContentValues;
 
+import java.util.List;
+
 /**
  * Базовый контракт CRUD-операций для разных движков БД.
  */
@@ -14,10 +16,21 @@ public interface DatabaseEngine {
     /**
      * Чтение таблицы с ограничением по строкам.
      *
+     * @param schema    имя схемы или пространства, где находится таблица
      * @param tableName имя таблицы
      * @param limit     лимит строк, -1 если лимита нет
      */
-    TableData readTable(String tableName, int limit) throws Exception;
+    TableData readTable(String schema, String tableName, int limit) throws Exception;
+
+    /**
+     * Список доступных схем/пространств имен.
+     */
+    List<SchemaInfo> listSchemas() throws Exception;
+
+    /**
+     * Возвращает список таблиц в выбранной схеме.
+     */
+    List<String> listTables(String schema) throws Exception;
 
     long insert(String tableName, ContentValues values) throws Exception;
 

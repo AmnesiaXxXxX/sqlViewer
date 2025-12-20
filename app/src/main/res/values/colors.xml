@@ -11,6 +11,7 @@
     <color name="supabase_on_background">#E5E7EB</color>
     <color name="supabase_on_surface">#D1D5DB</color>
     <color name="supabase_on_primary">#0A0F1F</color>
+    <color name="supabase_warning">#F59E0B</color>
 
     <color name="black" tools:ignore="UnusedResources">#FF000000</color>
     <color name="white" tools:ignore="UnusedResources">#FFFFFFFF</color>

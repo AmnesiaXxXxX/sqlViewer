@@ -67,7 +67,7 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
     }
 
     @Override
-    public TableData readTable(String tableName, int limit) {
+    public TableData readTable(String schema, String tableName, int limit) {
         List<String> columns = new ArrayList<>();
         List<List<String>> rows = new ArrayList<>();
 
@@ -100,6 +100,60 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
             }
         }
         return new TableData(columns, rows);
+    }
+
+    @Override
+    public List<SchemaInfo> listSchemas() {
+        List<SchemaInfo> schemas = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("PRAGMA database_list;", null);
+        try {
+            int nameIndex = cursor.getColumnIndexOrThrow("name");
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(nameIndex);
+                boolean editable = "main".equalsIgnoreCase(name);
+                schemas.add(new SchemaInfo(name, editable));
+            }
+        } finally {
+            cursor.close();
+        }
+
+        if (schemas.isEmpty()) {
+            schemas.add(new SchemaInfo("main", true));
+            schemas.add(new SchemaInfo("temp", false));
+        }
+        return schemas;
+    }
+
+    @Override
+    public List<String> listTables(String schema) {
+        List<String> tables = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String masterTable;
+        if (schema == null || schema.isEmpty()) {
+            masterTable = "sqlite_master";
+        } else if ("temp".equalsIgnoreCase(schema)) {
+            masterTable = "sqlite_temp_master";
+        } else {
+            masterTable = schema + ".sqlite_master";
+        }
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + masterTable + " WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;",
+                null
+        );
+        try {
+            int nameIndex = cursor.getColumnIndexOrThrow("name");
+            while (cursor.moveToNext()) {
+                tables.add(cursor.getString(nameIndex));
+            }
+        } finally {
+            cursor.close();
+        }
+
+        if (tables.isEmpty()) {
+            tables.add(DEMO_TABLE);
+        }
+        return tables;
     }
 
     @Override
