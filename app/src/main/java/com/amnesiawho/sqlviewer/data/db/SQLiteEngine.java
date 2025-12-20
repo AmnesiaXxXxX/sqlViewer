@@ -18,9 +18,12 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
     private static final String DB_NAME = "sqlviewer_local.db";
     private static final int DB_VERSION = 1;
     private static final String DEMO_TABLE = "demo_users";
+    private final String customPath;
+    private SQLiteDatabase externalDb;
 
-    public SQLiteEngine(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
+    public SQLiteEngine(Context context, String connectionUrl) {
+        super(context, resolveDbName(connectionUrl), null, DB_VERSION);
+        this.customPath = resolveCustomPath(connectionUrl);
     }
 
     @Override
@@ -62,8 +65,16 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
 
     @Override
     public void connect() {
-        // Инициализация базы. SQLiteOpenHelper сам управляет соединением.
-        getWritableDatabase();
+        if (customPath != null) {
+            java.io.File dbFile = new java.io.File(customPath);
+            if (!dbFile.exists()) {
+                throw new IllegalArgumentException("База данных не найдена по пути: " + customPath);
+            }
+            externalDb = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        } else {
+            // Инициализация базы. SQLiteOpenHelper сам управляет соединением.
+            getWritableDatabase();
+        }
     }
 
     @Override
@@ -185,7 +196,21 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
 
     @Override
     public void close() {
-        super.close();
+        if (externalDb != null && externalDb.isOpen()) {
+            externalDb.close();
+        } else {
+            super.close();
+        }
+    }
+
+    @Override
+    public SQLiteDatabase getReadableDatabase() {
+        return externalDb != null ? externalDb : super.getReadableDatabase();
+    }
+
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        return externalDb != null ? externalDb : super.getWritableDatabase();
     }
 
     private void validateTableName(String tableName) {
@@ -205,5 +230,30 @@ public class SQLiteEngine extends SQLiteOpenHelper implements DatabaseEngine {
             return "temp." + tableName;
         }
         return schema + "." + tableName;
+    }
+
+    private static String resolveDbName(String connectionUrl) {
+        if (connectionUrl == null || connectionUrl.trim().isEmpty()) {
+            return DB_NAME;
+        }
+        java.net.URI uri = java.net.URI.create(connectionUrl.trim());
+        String path = uri.getPath();
+        if (path == null || path.isEmpty() || "/".equals(path)) {
+            return DB_NAME;
+        }
+        String fileName = new java.io.File(path).getName();
+        return fileName.isEmpty() ? DB_NAME : fileName;
+    }
+
+    private static String resolveCustomPath(String connectionUrl) {
+        if (connectionUrl == null || connectionUrl.trim().isEmpty()) {
+            return null;
+        }
+        java.net.URI uri = java.net.URI.create(connectionUrl.trim());
+        String path = uri.getPath();
+        if (path == null || path.isEmpty() || "/".equals(path)) {
+            return null;
+        }
+        return path;
     }
 }

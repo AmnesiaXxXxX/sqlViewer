@@ -15,26 +15,27 @@ public class DatabaseManager {
 
     public DatabaseManager(Context context) {
         this.appContext = context.getApplicationContext();
-        switchEngine(DbEngineType.SQLITE);
+        switchEngine(DbEngineType.SQLITE, null);
     }
 
     /**
      * Переключение движка. Здесь можно добавить инициализацию JDBC драйверов при необходимости.
      */
-    public void switchEngine(DbEngineType type) {
+    public void switchEngine(DbEngineType type, String connectionUrl) {
         currentType = type;
         if (currentEngine != null) {
             currentEngine.close();
         }
         if (type == DbEngineType.SQLITE) {
-            currentEngine = new SQLiteEngine(appContext);
+            currentEngine = new SQLiteEngine(appContext, connectionUrl);
         } else {
-            currentEngine = new StubEngine(type);
+            throw new UnsupportedOperationException("Подключение к " + type.getTitle() + " пока не поддержано — требуется реальный драйвер");
         }
         try {
             currentEngine.connect();
         } catch (Exception e) {
             GlobalExceptionHandler.reportHandled(appContext, e);
+            throw new IllegalStateException("Не удалось подключиться к базе: " + e.getMessage(), e);
         }
     }
 

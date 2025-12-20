@@ -29,6 +29,7 @@ public class TableSelectionActivity extends AppCompatActivity {
     public static final String EXTRA_SCHEMA_NAME = "schema_name";
     public static final String EXTRA_SCHEMA_EDITABLE = "schema_editable";
     public static final String EXTRA_ENGINE_TYPE = "engine_type";
+    public static final String EXTRA_CONNECTION_URL = "connection_url";
 
     public static final String EXTRA_SELECTED_TABLE = "selected_table";
 
@@ -44,6 +45,7 @@ public class TableSelectionActivity extends AppCompatActivity {
     private boolean schemaEditable;
     private String selectedTable;
     private DbEngineType engineType;
+    private String connectionUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class TableSelectionActivity extends AppCompatActivity {
         schemaName = getIntent().getStringExtra(EXTRA_SCHEMA_NAME);
         schemaEditable = getIntent().getBooleanExtra(EXTRA_SCHEMA_EDITABLE, false);
         String engineTypeName = getIntent().getStringExtra(EXTRA_ENGINE_TYPE);
+        connectionUrl = getIntent().getStringExtra(EXTRA_CONNECTION_URL);
 
         if (schemaName == null || engineTypeName == null) {
             Toast.makeText(this, "Не удалось открыть список таблиц", Toast.LENGTH_SHORT).show();
@@ -68,7 +71,13 @@ public class TableSelectionActivity extends AppCompatActivity {
 
         engineType = DbEngineType.valueOf(engineTypeName);
         databaseManager = new DatabaseManager(this);
-        databaseManager.switchEngine(engineType);
+        try {
+            databaseManager.switchEngine(engineType, connectionUrl);
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         setupViews();
         bindSchemaInfo();
@@ -135,6 +144,7 @@ public class TableSelectionActivity extends AppCompatActivity {
         intent.putExtra(EXTRA_SCHEMA_NAME, schemaName);
         intent.putExtra(EXTRA_SCHEMA_EDITABLE, schemaEditable);
         intent.putExtra(EXTRA_ENGINE_TYPE, engineType.name());
+        intent.putExtra(EXTRA_CONNECTION_URL, connectionUrl);
         intent.putExtra(EXTRA_SELECTED_TABLE, selectedTable);
         startActivity(intent);
     }

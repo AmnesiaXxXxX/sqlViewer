@@ -48,6 +48,7 @@ public class TableDataActivity extends AppCompatActivity {
         schemaEditable = getIntent().getBooleanExtra(TableSelectionActivity.EXTRA_SCHEMA_EDITABLE, false);
         tableName = getIntent().getStringExtra(TableSelectionActivity.EXTRA_SELECTED_TABLE);
         String engineTypeName = getIntent().getStringExtra(TableSelectionActivity.EXTRA_ENGINE_TYPE);
+        String connectionUrl = getIntent().getStringExtra(TableSelectionActivity.EXTRA_CONNECTION_URL);
 
         if (schemaName == null || tableName == null || engineTypeName == null) {
             Toast.makeText(this, "Не удалось открыть данные таблицы", Toast.LENGTH_SHORT).show();
@@ -56,7 +57,13 @@ public class TableDataActivity extends AppCompatActivity {
         }
 
         databaseManager = new DatabaseManager(this);
-        databaseManager.switchEngine(DbEngineType.valueOf(engineTypeName));
+        try {
+            databaseManager.switchEngine(DbEngineType.valueOf(engineTypeName), connectionUrl);
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         setupViews();
         bindHeader();

@@ -25,11 +25,13 @@ import java.util.List;
 public class SchemaSelectionActivity extends AppCompatActivity {
 
     public static final String EXTRA_ENGINE_TYPE = "engine_type";
+    public static final String EXTRA_CONNECTION_URL = "connection_url";
 
     private DatabaseManager databaseManager;
     private SchemaAdapter schemaAdapter;
     private TextView engineTitleLabel;
     private DbEngineType engineType;
+    private String connectionUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class SchemaSelectionActivity extends AppCompatActivity {
         });
 
         String engineTypeName = getIntent().getStringExtra(EXTRA_ENGINE_TYPE);
+        connectionUrl = getIntent().getStringExtra(EXTRA_CONNECTION_URL);
         if (engineTypeName == null) {
             Toast.makeText(this, "Не удалось определить подключение", Toast.LENGTH_SHORT).show();
             finish();
@@ -51,7 +54,13 @@ public class SchemaSelectionActivity extends AppCompatActivity {
 
         engineType = DbEngineType.valueOf(engineTypeName);
         databaseManager = new DatabaseManager(this);
-        databaseManager.switchEngine(engineType);
+        try {
+            databaseManager.switchEngine(engineType, connectionUrl);
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         setupViews();
         loadSchemas();
@@ -86,6 +95,7 @@ public class SchemaSelectionActivity extends AppCompatActivity {
         intent.putExtra(TableSelectionActivity.EXTRA_SCHEMA_NAME, schemaInfo.getName());
         intent.putExtra(TableSelectionActivity.EXTRA_SCHEMA_EDITABLE, schemaInfo.isEditable());
         intent.putExtra(TableSelectionActivity.EXTRA_ENGINE_TYPE, engineType.name());
+        intent.putExtra(TableSelectionActivity.EXTRA_CONNECTION_URL, connectionUrl);
         startActivity(intent);
     }
 }

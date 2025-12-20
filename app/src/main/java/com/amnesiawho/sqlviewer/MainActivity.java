@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText urlInput;
     private TextView engineLabel;
     private Button connectButton;
+    private String lastConnectionUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +62,18 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
             DbEngineType engineType = UrlEngineResolver.resolve(url);
-            databaseManager.switchEngine(engineType);
+            databaseManager.switchEngine(engineType, url);
             updateEngineLabel(engineType);
             Toast.makeText(this, "Подключение успешно: " + engineType.getTitle(), Toast.LENGTH_SHORT).show();
-            openSchemaSelection(engineType);
+            lastConnectionUrl = url;
+            openSchemaSelection(engineType, url);
         } catch (IllegalArgumentException ex) {
+            updateEngineLabel(null);
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (UnsupportedOperationException ex) {
+            updateEngineLabel(null);
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (IllegalStateException ex) {
             updateEngineLabel(null);
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
         }
@@ -79,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openSchemaSelection(DbEngineType engineType) {
+    private void openSchemaSelection(DbEngineType engineType, String connectionUrl) {
         Intent intent = new Intent(this, SchemaSelectionActivity.class);
         intent.putExtra(SchemaSelectionActivity.EXTRA_ENGINE_TYPE, engineType.name());
+        intent.putExtra(SchemaSelectionActivity.EXTRA_CONNECTION_URL, connectionUrl);
         startActivity(intent);
     }
 }
